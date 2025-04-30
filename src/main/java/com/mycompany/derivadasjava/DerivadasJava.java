@@ -97,49 +97,52 @@ public class DerivadasJava {
     // Método para derivar la función
     public static String derivarFuncion( String funcion ) {
         try {
-            funcion = funcion.replace(" ", "");
+            // Limpiamos la funcion
+            funcion = funcion.replace( " ", "" );
 
             // Aseguramos que todos los términos tengan signo para poder dividir correctamente
-            if (funcion.charAt(0) != '-') funcion = "+" + funcion;
+            if ( funcion.charAt( 0 ) != '-' ) funcion = "+" + funcion;
 
-            // Separamos términos
+            // Separamos términos y los metemos en un arreglo
             List<String> terminos = new ArrayList<>();
             StringBuilder actual = new StringBuilder();
-            for (int i = 0; i < funcion.length(); i++) {
-                char c = funcion.charAt(i);
-                if ((c == '+' || c == '-') && actual.length() > 0) {
-                    terminos.add(actual.toString());
-                    actual = new StringBuilder();
+            for ( int i = 0; i < funcion.length(); i++ ) {
+                char caracter = funcion.charAt( i );
+                if ( ( caracter == '+' || caracter == '-' ) && actual.length() > 0 ) {
+                    terminos.add( actual.toString() ); // Guarda el término construido hasta ahora
+                    actual = new StringBuilder(); // Limpia "actual" para empezar a construir el siguiente término
                 }
-                actual.append(c);
+                actual.append( caracter );
             }
-            terminos.add(actual.toString());
+            terminos.add( actual.toString() );
 
-            // Derivar cada término
+            // Creamos variable para almacenar la derivada de cada termino
             StringBuilder resultado = new StringBuilder();
-            for (String termino : terminos) {
-                termino = termino.trim();
-                if (termino.isEmpty()) continue;
+            
+            // Derivar cada término
+            for ( String termino : terminos ) {
+                termino = termino.trim(); // Elimina espacios en blanco
+                if ( termino.isEmpty() ) continue; // Si el termino esta vacio lo salta y sigue con el siguiente
 
                 String derivado = "";
-                if (!termino.contains("x")) {
+                if ( !termino.contains( "x" ) ) {
                     // Es constante, derivada = 0
-                    derivado = "0";
+                    derivado = "";
                 } else {
-                    String sinConst = reglaDeConstante(termino);
-                    derivado = reglaDePotencia(sinConst);
+                    String sinConst = reglaDeConstante( termino );
+                    derivado = reglaDePotencia( sinConst );
 
                     // Recuperar signo
-                    if (termino.charAt(0) == '-' && !derivado.startsWith("-")) {
+                    if ( termino.charAt( 0 ) == '-' && !derivado.startsWith( "-" ) ) {
                         derivado = "-" + derivado;
-                    } else if (termino.charAt(0) == '+' && !derivado.startsWith("-")) {
+                    } else if ( termino.charAt( 0 ) == '+' && !derivado.startsWith( "-" ) ) {
                         derivado = "+" + derivado;
-                    } else if (!derivado.startsWith("-") && !derivado.startsWith("+")) {
+                    } else if ( !derivado.startsWith( "-" ) && !derivado.startsWith( "+" ) ) {
                         derivado = "+" + derivado;
                     }
                 }
 
-                resultado.append(derivado);
+                resultado.append( derivado ); // Se guardan los resultados en el arreglo por termino
             }
 
             // Limpieza final: eliminar primer '+' si lo hay
