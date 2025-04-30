@@ -9,6 +9,8 @@ package com.mycompany.derivadasjava;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.regex.*;
 import javax.swing.*;
 
@@ -95,18 +97,60 @@ public class DerivadasJava {
     // Método para derivar la función
     public static String derivarFuncion( String funcion ) {
         try {
-            /*// Crear la expresión a partir de la función
-            Expression exp = new ExpressionBuilder( funcion )
-                    .variable( "x" )
-                    .build();*/
-            
-            // Comenzamos a evaluar cada regla
-            String funcionConstante = reglaDeConstante( funcion );
-            String funcionPotencias = reglaDePotencia( funcionConstante );
-            
-            return funcionPotencias;
-            
-        } catch ( Exception e ) {
+            funcion = funcion.replace(" ", "");
+
+            // Aseguramos que todos los términos tengan signo para poder dividir correctamente
+            if (funcion.charAt(0) != '-') funcion = "+" + funcion;
+
+            // Separamos términos
+            List<String> terminos = new ArrayList<>();
+            StringBuilder actual = new StringBuilder();
+            for (int i = 0; i < funcion.length(); i++) {
+                char c = funcion.charAt(i);
+                if ((c == '+' || c == '-') && actual.length() > 0) {
+                    terminos.add(actual.toString());
+                    actual = new StringBuilder();
+                }
+                actual.append(c);
+            }
+            terminos.add(actual.toString());
+
+            // Derivar cada término
+            StringBuilder resultado = new StringBuilder();
+            for (String termino : terminos) {
+                termino = termino.trim();
+                if (termino.isEmpty()) continue;
+
+                String derivado = "";
+                if (!termino.contains("x")) {
+                    // Es constante, derivada = 0
+                    derivado = "0";
+                } else {
+                    String sinConst = reglaDeConstante(termino);
+                    derivado = reglaDePotencia(sinConst);
+
+                    // Recuperar signo
+                    if (termino.charAt(0) == '-' && !derivado.startsWith("-")) {
+                        derivado = "-" + derivado;
+                    } else if (termino.charAt(0) == '+' && !derivado.startsWith("-")) {
+                        derivado = "+" + derivado;
+                    } else if (!derivado.startsWith("-") && !derivado.startsWith("+")) {
+                        derivado = "+" + derivado;
+                    }
+                }
+
+                resultado.append(derivado);
+            }
+
+            // Limpieza final: eliminar primer '+' si lo hay
+            String finalResultado = resultado.toString();
+            if (finalResultado.startsWith("+")) {
+                finalResultado = finalResultado.substring(1);
+            }
+
+            return finalResultado;
+
+        } catch (Exception e) {
             return "Error en derivada.";
         }
     }
@@ -188,72 +232,47 @@ public class DerivadasJava {
     }
     
     // Metodo para evaluar la regla de potencia
-    public static String reglaDePotencia( String funcion ){
+    public static String reglaDePotencia( String funcion ) {
         
-        // Limpiamos la función en caso de que tenga espacios
-        funcion = funcion.replace( " ", "" );
-        String potencia = encontrarPotencias( funcion );
-        String copiaPotencia = potencia;
-        String potenciaSinExpotente = "";
-        String copiaPotenciaSinExpotente = "";
-        System.out.println(!encontrarPotenciaSinExponente( funcion ).isEmpty());
-        if ( !encontrarPotenciaSinExponente( funcion ).isEmpty() ){
-            potenciaSinExpotente = encontrarPotenciaSinExponente( funcion );
-            copiaPotenciaSinExpotente = potenciaSinExpotente;
-        }
-        
-        
-        //Limpiamos la potencia en caso de que tenga espacios
-        potencia = potencia.replace( " ", "" );
-        
-        // Hallamos la potencia y la ponemos de primero reducida 1 unidad
-        int posicionPotencia = funcion.indexOf("^") + 1;
-        String exponente = potencia.substring( posicionPotencia, posicionPotencia + 1 );
-        potencia = exponente + potencia.substring( 0, potencia.length() - 1 );
-        int exponenteNum = Integer.parseInt(exponente) - 1;
-        exponente = String.valueOf(exponenteNum);
-        potencia = potencia + exponente;
-        String potenciaTemp = potencia;
-        
-        // Recorremos la función para detectar números seguidos
-        for ( int i = 0; i < potencia.length() - 1; i++ ) {
-            
-            char actual = potencia.charAt( i );
-            char siguiente = potencia.charAt( i + 1 );
-            
-            // Evaluamos si ambos son números y estan seguidos
-            if ( Character.isDigit( actual ) && Character.isDigit( siguiente ) ){
-                // Creamos variable para el resultado
-                int resultado = 1;
+        funcion = funcion.replace( " ", "" ); // Limpieza
 
-                // Multiplicamos siempre que hallan múmeros seguidos
-                resultado *= Character.getNumericValue( potencia.charAt( i ) );
-                resultado *= Character.getNumericValue( potencia.charAt( i + 1 ) );
-                
-                // Borramos los números de potencia
-                int ubicaciontemp = potenciaTemp.indexOf( potencia );
-                potenciaTemp = potenciaTemp.substring( ubicaciontemp + 2 );
-                String resultadoTemp = String.valueOf( resultado );
-                potencia = resultadoTemp + potenciaTemp;
-                i++;
-            }
+        if ( !funcion.contains( "x" ) ) return ""; // No es una potencia
+
+        // Obtener coeficiente (antes de 'x')
+        int xIndex = funcion.indexOf( "x" );
+        String coefStr = funcion.substring( 0, xIndex );
+        if ( coefStr.isEmpty() ) coefStr = "1";
+        else if ( coefStr.equals( "+" ) ) coefStr = "1";
+        else if ( coefStr.equals( "-" ) ) coefStr = "-1";
+
+        double coef = Double.parseDouble( coefStr );
+
+        // Obtener exponente (después de '^')
+        int exp = 1;
+        if ( funcion.contains( "^" ) ) {
+            int powIndex = funcion.indexOf( "^" );
+            String expStr = funcion.substring( powIndex + 1 );
+            exp = Integer.parseInt( expStr );
         }
-        
-        // Evaluamos si la potencia es 1 entonces no la nombramos y dejamos la variable sola
-        posicionPotencia = potencia.indexOf( "^" ) + 1;
-        if ( potencia.charAt( posicionPotencia ) == '1' ){
-            potencia = potencia.substring( 0, potencia.length() - 2 );
+
+        double nuevoCoef = coef * exp;
+        int nuevoExp = exp - 1;
+
+        // Formatear resultado
+        if ( nuevoExp == 0 ) {
+            return String.valueOf( nuevoCoef );
+        } else if ( nuevoExp == 1 ) {
+            return formatearCoef( nuevoCoef ) + "x";
+        } else {
+            return formatearCoef( nuevoCoef ) + "x^" + nuevoExp;
         }
-        
-        String funcionTemp = funcion.replace( copiaPotencia, potencia );
-        
-        // Tratamos potencias elexadas a la 1
-        if ( !encontrarPotenciaSinExponente( funcion ).isEmpty() ){
-            potenciaSinExpotente = potenciaSinExpotente.substring( 0, potenciaSinExpotente.length() - 1 );
-            funcionTemp = funcionTemp.replace(copiaPotenciaSinExpotente, potenciaSinExpotente);
-        }
-        
-        
-        return funcionTemp;
+    }
+    
+    // Metodo para formatear coeficientes de potencias
+    private static String formatearCoef(double coef) {
+        if (coef == 1.0) return "";
+        if (coef == -1.0) return "-";
+        if (coef == (int) coef) return String.valueOf((int) coef);
+        return String.valueOf(coef); // Para decimales
     }
 }
