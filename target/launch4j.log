@@ -1,0 +1,33 @@
+
+
+Version:	3.50
+CmdLine:	C:\Users\javiz\Documents\Estudio\UT\Semestre 2\Calculo 1\derivadasJava\target\DerivadasDelMejorCipas.exe --l4j-debug
+JNI:		No
+WOW64:		Yes
+Working dir:	C:\Users\javiz\Documents\Estudio\UT\Semestre 2\Calculo 1\derivadasJava\target\.
+Requires JDK:	No
+Requires 64-Bit: No
+Java min ver:	
+Java max ver:	
+Substitute:	JAVA_HOME = 
+Substitute:	PATH = C:\Program Files\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Users\javiz\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\javiz\AppData\Local\Programs\Python\Python313\;C:\Users\javiz\AppData\Local\Microsoft\WindowsApps;C:\Users\javiz\AppData\Roaming\npm;C:\Users\javiz\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\Java\jdk-21\bin
+JRE paths:	;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Users\javiz\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\javiz\AppData\Local\Programs\Python\Python313\;C:\Users\javiz\AppData\Local\Microsoft\WindowsApps;C:\Users\javiz\AppData\Roaming\npm;C:\Users\javiz\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\Java\jdk-21\bin
+Check launcher:	C:\Program Files\Common Files\Oracle\Java\javapath\bin\javaw.exe (not found)
+Check launcher:	C:\Windows\system32\bin\javaw.exe (not found)
+Check launcher:	C:\Windows\bin\javaw.exe (not found)
+Check launcher:	C:\Windows\System32\Wbem\bin\javaw.exe (not found)
+Check launcher:	C:\Windows\System32\WindowsPowerShell\v1.0\bin\javaw.exe (not found)
+Check launcher:	C:\Windows\System32\OpenSSH\bin\javaw.exe (not found)
+Check launcher:	C:\Program Files\nodejs\bin\javaw.exe (not found)
+Check launcher:	C:\Program Files\Git\cmd\bin\javaw.exe (not found)
+Check launcher:	C:\Users\javiz\AppData\Local\Programs\Python\Python313\Scripts\bin\javaw.exe (not found)
+Check launcher:	C:\Users\javiz\AppData\Local\Programs\Python\Python313\bin\javaw.exe (not found)
+Check launcher:	C:\Users\javiz\AppData\Local\Microsoft\WindowsApps\bin\javaw.exe (not found)
+Check launcher:	C:\Users\javiz\AppData\Roaming\npm\bin\javaw.exe (not found)
+Check launcher:	C:\Users\javiz\AppData\Local\Programs\Microsoft VS Code\bin\javaw.exe (not found)
+Check launcher:	C:\Program Files\Java\jdk-21\bin\javaw.exe (OK)
+Version string: 1.021.000_006 / 64-Bit (OK)
+Launcher:	C:\Program Files\Java\jdk-21\bin\javaw.exe
+Launcher args:	-jar "C:\Users\javiz\Documents\Estudio\UT\Semestre 2\Calculo 1\derivadasJava\target\derivadasJava-1.0-SNAPSHOT.jar"
+Args length:	115/32768 chars
+Exit code:	0

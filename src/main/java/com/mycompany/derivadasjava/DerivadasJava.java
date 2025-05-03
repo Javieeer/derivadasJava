@@ -11,11 +11,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.*;
 import javax.swing.*;
 
 public class DerivadasJava {
 
+    //Menu principal
     public static void main( String[] args ) {
         
         // Creamos la ventana del menu
@@ -427,20 +430,299 @@ public class DerivadasJava {
         ventanaPrincipal.setVisible( true );
     }
     
-    public static String reglaSum(String derivadafx, String derivadaGx){
-        return "prueba"; 
+    // Metodo para la regla de adicion entre dos funciones
+    public static String reglaSum(String derivadaFx, String derivadaGx){ // f'(x)+g'(x)
+        
+        String fx = derivadaFx.replaceAll("\\s+", "");
+        String gx = derivadaGx.replaceAll("\\s+", "");
+
+        List<String> terminosFx = new ArrayList<>();
+        Matcher m1 = Pattern.compile("[+-]?[^+-]+").matcher(fx);
+        while (m1.find()) terminosFx.add(m1.group());
+
+        List<String> terminosGx = new ArrayList<>();
+        Matcher m2 = Pattern.compile("[+-]?[^+-]+").matcher(gx);
+        while (m2.find()) terminosGx.add(m2.group());
+
+        Map<String, Double> mapa = new HashMap<>();
+
+        // Sumar coeficientes de fx
+        for (String termino : terminosFx) {
+            Matcher match = Pattern.compile("([+-]?\\d*\\.?\\d*)([a-zA-Z][\\^\\d]*)?").matcher(termino);
+            if (match.matches()) {
+                String coefStr = match.group(1);
+                String var = match.group(2) == null ? "" : match.group(2);
+                double coef = (coefStr.equals("+") || coefStr.isEmpty()) ? 1 :
+                              (coefStr.equals("-") ? -1 : Double.parseDouble(coefStr));
+                mapa.put(var, mapa.getOrDefault(var, 0.0) + coef);
+            }
+        }
+
+        // Sumar coeficientes de gx
+        for (String termino : terminosGx) {
+            Matcher match = Pattern.compile("([+-]?\\d*\\.?\\d*)([a-zA-Z][\\^\\d]*)?").matcher(termino);
+            if (match.matches()) {
+                String coefStr = match.group(1);
+                String var = match.group(2) == null ? "" : match.group(2);
+                double coef = (coefStr.equals("+") || coefStr.isEmpty()) ? 1 :
+                              (coefStr.equals("-") ? -1 : Double.parseDouble(coefStr));
+                mapa.put(var, mapa.getOrDefault(var, 0.0) + coef);
+            }
+        }
+
+        return construirResultadoOrdenado(mapa);
     }
     
-    public static String reglaDif(String derivadafx, String derivadaGx){
-        return "prueba";
+    // Metodo para la regla de diferencia entre dos funciones
+    public static String reglaDif(String derivadaFx, String derivadaGx){ // f'(x)-g'(x)
+        
+        String fx = derivadaFx.replaceAll("\\s+", "");
+        String gx = derivadaGx.replaceAll("\\s+", "");
+
+        List<String> terminosFx = new ArrayList<>();
+        Matcher m1 = Pattern.compile("[+-]?[^+-]+").matcher(fx);
+        while (m1.find()) terminosFx.add(m1.group());
+
+        List<String> terminosGx = new ArrayList<>();
+        Matcher m2 = Pattern.compile("[+-]?[^+-]+").matcher(gx);
+        while (m2.find()) terminosGx.add(m2.group());
+
+        Map<String, Double> mapa = new HashMap<>();
+
+        // Sumar coeficientes de fx
+        for (String termino : terminosFx) {
+            Matcher match = Pattern.compile("([+-]?\\d*\\.?\\d*)([a-zA-Z][\\^\\d]*)?").matcher(termino);
+            if (match.matches()) {
+                String coefStr = match.group(1);
+                String var = match.group(2) == null ? "" : match.group(2);
+                double coef = (coefStr.equals("+") || coefStr.isEmpty()) ? 1 :
+                              (coefStr.equals("-") ? -1 : Double.parseDouble(coefStr));
+                mapa.put(var, mapa.getOrDefault(var, 0.0) + coef);
+            }
+        }
+
+        // Restar coeficientes de gx
+        for (String termino : terminosGx) {
+            Matcher match = Pattern.compile("([+-]?\\d*\\.?\\d*)([a-zA-Z][\\^\\d]*)?").matcher(termino);
+            if (match.matches()) {
+                String coefStr = match.group(1);
+                String var = match.group(2) == null ? "" : match.group(2);
+                double coef = (coefStr.equals("+") || coefStr.isEmpty()) ? 1 :
+                              (coefStr.equals("-") ? -1 : Double.parseDouble(coefStr));
+                mapa.put(var, mapa.getOrDefault(var, 0.0) - coef);
+            }
+        }
+
+        return construirResultadoOrdenado(mapa);
     }
     
-    public static String reglaPro(String funcionfx, String derivadaGx, String funciongx, String derivadafx){
-        return "prueba";
+    // Metodo para la regla de producto entre dos funciones
+    // f(x)*g'(x)+g(x)*f'(x)
+    public static String reglaPro(String funcionfx, String derivadaGx, String funciongx, String derivadaFx){
+        String f1g = multiplicarFunciones(derivadaFx, funciongx); // f'(x) * g(x)
+        String fg1 = multiplicarFunciones(funcionfx, derivadaGx); // f(x) * g'(x)
+
+        // Ahora sumamos los dos resultados obtenidos
+        return reglaSum(f1g, fg1);
     }
     
+    // Metodo para la regla de cociente entre dos funciones
+    // (g(x)*f'(x)-f(x)*g'(x))/(g(x))^2 siempre y cuando g(x) != 0
     public static String reglaCo(String funcionfx, String derivadaGx, String funciongx, String derivadafx){
-        return "prueba";
+        String f1g = multiplicarFunciones(derivadafx, funciongx); // f'(x) * g(x)
+        String fg1 = multiplicarFunciones(funcionfx, derivadaGx); // f(x) * g'(x)
+
+        // Diferencia en el numerador
+        String numerador = reglaDif(f1g, fg1);
+
+        // Denominador es g(x)^2
+        String denominador = resolverDenominador(funciongx);
+
+        return numerador + " / " + denominador;
+    }
+    
+    // Metodo para resolver el denominador
+    public static String resolverDenominador(String denominador){
+        
+// Limpiamos
+        String den = denominador.replaceAll("\\s+", "");
+        
+        // Aseguramos que todos los términos tengan signo para poder multiplicar correctamente
+        if ( den.charAt( 0 ) != '-' ) den = "+" + den.substring(0);
+            
+        // Separamos términos y los metemos en un arreglo
+        List<String> terminos = new ArrayList<>();
+        StringBuilder actual = new StringBuilder();
+        for ( int i = 0; i < den.length(); i++ ) {
+            char caracter = den.charAt( i );
+            if ( caracter != '(' && caracter != ')' ){
+                if ( ( caracter == '+' || caracter == '-' ) && actual.length() > 1 ) {
+                    terminos.add( actual.toString() ); // Guarda el término construido hasta ahora
+                    actual = new StringBuilder(); // Limpia "actual" para empezar a construir el siguiente término
+                }
+                actual.append( caracter );
+            }
+        }
+        terminos.add( actual.toString() );
+        
+        // Creamos variable para almacenar el resultado de cada termino
+        StringBuilder resultado = new StringBuilder();
+        
+        for ( String termino : terminos ){
+            
+            // Eliminamos espacios si los hay
+            termino = termino.trim();
+            
+            // Si esta vacío continuamos
+            if (termino.isEmpty()) continue;
+
+            // Asumimos coeficiente y exponente por defecto
+            double coef = 1;
+            int exponente = 1;
+            boolean negativo = false;
+
+            // Tenemos en cuenta si empieza en negativo para pasarlo a positivo
+            if (termino.charAt(0) == '-') {
+                negativo = true;
+                termino = termino.substring(1);
+            }
+
+            // Si el término es constante le aplicamos la potencia y lo guardamos
+            if (!termino.contains("x")) {
+                coef = Double.parseDouble(termino);
+                
+                // Si es negativo lo pasamos a negativo multiplicandolo por -1
+                if (negativo) coef *= -1;
+                double nuevoCoef = coef * coef;
+                resultado.append("+").append(nuevoCoef);
+                
+                // Continuamos con el siguiente termino
+                continue;
+            }
+
+            // Extraer coeficiente (Número antes de X)
+            int indexX = termino.indexOf("x");
+            if (indexX > 0) {
+                coef = Double.parseDouble(termino.substring(0, indexX));
+            }
+
+            // Si es negativo se convierte a negativo
+            if (negativo) coef *= -1;
+
+            // Extraer exponente si existe (Luego de ^)
+            if (termino.contains("^")) {
+                String expStr = termino.substring(termino.indexOf("^") + 1);
+                exponente = Integer.parseInt(expStr);
+            }
+
+            // Elevar al cuadrado los valores
+            double nuevoCoef = coef * coef;
+            int nuevoExp = exponente * 2;
+
+            // Escribimos el resultado que siempre será positivo
+            resultado.append("+").append(nuevoCoef).append("x^").append(nuevoExp);
+        }
+        
+        // Limpieza final: eliminar primer '+' si lo hay
+        String finalResultado = resultado.toString();
+        if ( finalResultado.startsWith( "+" ) ) {
+            finalResultado = finalResultado.substring( 1 );
+        }
+        
+        return finalResultado;
+        
+    }
+    
+    // Metodo para construir una cadena de mayor a menor grado
+    public static String construirResultadoOrdenado(Map<String, Double> mapa) {
+        List<String> variablesOrdenadas = new ArrayList<>(mapa.keySet());
+
+        // Ordenar por grado (de mayor a menor)
+        variablesOrdenadas.sort((a, b) -> {
+            int gradoA = a.matches("x\\^\\d+") ? Integer.parseInt(a.substring(2)) :
+                         (a.equals("x") ? 1 : 0);
+            int gradoB = b.matches("x\\^\\d+") ? Integer.parseInt(b.substring(2)) :
+                         (b.equals("x") ? 1 : 0);
+            return Integer.compare(gradoB, gradoA);
+        });
+
+        StringBuilder resultado = new StringBuilder();
+        for (String var : variablesOrdenadas) {
+            double coef = mapa.get(var);
+            if (coef == 0) continue;
+
+            if (resultado.length() > 0 && coef > 0) resultado.append("+");
+
+            if (coef == 1 && !var.isEmpty()) resultado.append(var);
+            else if (coef == -1 && !var.isEmpty()) resultado.append("-").append(var);
+            else resultado.append(coef).append(var);
+        }
+
+        return resultado.length() == 0 ? "0" : resultado.toString();
+    }
+    
+    // Metodo para multiplicar dos funciones entre si
+    public static String multiplicarFunciones(String f1, String f2) {
+        f1 = f1.replaceAll("\\s+", "");
+        f2 = f2.replaceAll("\\s+", "");
+
+        List<String> terminosF1 = new ArrayList<>();
+        Matcher m1 = Pattern.compile("[+-]?[^+-]+").matcher(f1);
+        while (m1.find()) terminosF1.add(m1.group());
+
+        List<String> terminosF2 = new ArrayList<>();
+        Matcher m2 = Pattern.compile("[+-]?[^+-]+").matcher(f2);
+        while (m2.find()) terminosF2.add(m2.group());
+
+        Map<String, Double> mapa = new HashMap<>();
+
+        for (String t1 : terminosF1) {
+            Matcher match1 = Pattern.compile("([+-]?\\d*\\.?\\d*)([a-zA-Z][\\^\\d]*)?").matcher(t1);
+            if (!match1.matches()) continue;
+
+            String coefStr1 = match1.group(1);
+            String var1 = match1.group(2) == null ? "" : match1.group(2);
+            double coef1 = (coefStr1.equals("+") || coefStr1.isEmpty()) ? 1 :
+                           (coefStr1.equals("-") ? -1 : Double.parseDouble(coefStr1));
+
+            for (String t2 : terminosF2) {
+                Matcher match2 = Pattern.compile("([+-]?\\d*\\.?\\d*)([a-zA-Z][\\^\\d]*)?").matcher(t2);
+                if (!match2.matches()) continue;
+
+                String coefStr2 = match2.group(1);
+                String var2 = match2.group(2) == null ? "" : match2.group(2);
+                double coef2 = (coefStr2.equals("+") || coefStr2.isEmpty()) ? 1 :
+                               (coefStr2.equals("-") ? -1 : Double.parseDouble(coefStr2));
+
+                double nuevoCoef = coef1 * coef2;
+                String nuevaVar = combinarVariables(var1, var2);
+
+                mapa.put(nuevaVar, mapa.getOrDefault(nuevaVar, 0.0) + nuevoCoef);
+            }
+        }
+
+        return construirResultadoOrdenado(mapa);
+    }
+
+    // Metodo para combinar terminos con el mismo coeficiente y misma literal
+    public static String combinarVariables(String var1, String var2) {
+        if (var1.isEmpty()) return var2;
+        if (var2.isEmpty()) return var1;
+
+        // Solo considera multiplicación de potencias de la misma base
+        Pattern p = Pattern.compile("x(?:\\^(\\d+))?");
+        Matcher m1 = p.matcher(var1);
+        Matcher m2 = p.matcher(var2);
+
+        if (m1.matches() && m2.matches()) {
+            int exp1 = m1.group(1) == null ? 1 : Integer.parseInt(m1.group(1));
+            int exp2 = m2.group(1) == null ? 1 : Integer.parseInt(m2.group(1));
+            int suma = exp1 + exp2;
+            return suma == 1 ? "x" : "x^" + suma;
+        }
+
+        // Si son distintas, concatenar simbólicamente
+        return var1 + "*" + var2;
     }
     
     // Método para derivar la función
