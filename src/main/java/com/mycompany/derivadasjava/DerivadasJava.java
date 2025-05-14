@@ -399,12 +399,18 @@ public class DerivadasJava {
 
                     // Hallamos las derivadas
                     String derivadafx = derivarFuncion( funcionfx );
+                    //System.out.println(derivadafx);
                     String derivadaGx = derivarFuncion( funciongx );
+                    //System.out.println(derivadaGx);
                     String resulSum = reglaSum( derivadafx, derivadaGx ); // f'(x)+g'(x)
+                    //System.out.println(resulSum);
                     String resulDif = reglaDif( derivadafx, derivadaGx ); // f'(x)-g'(x)
+                    //System.out.println(resulDif);
                     String resulPro = reglaPro( funcionfx, derivadaGx, funciongx, derivadafx ); // f(x)*g'(x)+g(x)*f'(x)
+                    //System.out.println(resulPro);
                     String resulCo = reglaCo( funcionfx, derivadaGx, funciongx, derivadafx ); // (g(x)*f'(x)-f(x)*g'(x))/(g(x))^2 siempre y cuando g(x) != 0
-
+                    //System.out.println(resulCo);
+                    
                     // Mostramos las derivadas
                     derivada1.setText( "Derivada f(x): " + derivadafx );
                     derivada2.setText( "Derivada g(x): " + derivadaGx );
@@ -537,100 +543,95 @@ public class DerivadasJava {
 
         // Denominador es g(x)^2
         String denominador = resolverDenominador(funciongx);
-
+        System.out.println("Y nos devuelve: " + denominador);
+        
         return numerador + " / " + denominador;
     }
     
     // Metodo para resolver el denominador
-    public static String resolverDenominador(String denominador){
-        
-// Limpiamos
+    public static String resolverDenominador(String denominador) {
+
+        // Limpiamos
         String den = denominador.replaceAll("\\s+", "");
-        
-        // Aseguramos que todos los términos tengan signo para poder multiplicar correctamente
-        if ( den.charAt( 0 ) != '-' ) den = "+" + den.substring(0);
-            
+
+        // Aseguramos que todos los términos tengan signo para poder separar correctamente
+        if (den.charAt(0) != '-') den = "+" + den;
+
         // Separamos términos y los metemos en un arreglo
         List<String> terminos = new ArrayList<>();
         StringBuilder actual = new StringBuilder();
-        for ( int i = 0; i < den.length(); i++ ) {
-            char caracter = den.charAt( i );
-            if ( caracter != '(' && caracter != ')' ){
-                if ( ( caracter == '+' || caracter == '-' ) && actual.length() > 1 ) {
-                    terminos.add( actual.toString() ); // Guarda el término construido hasta ahora
-                    actual = new StringBuilder(); // Limpia "actual" para empezar a construir el siguiente término
+        for (int i = 0; i < den.length(); i++) {
+            char caracter = den.charAt(i);
+            if (caracter != '(' && caracter != ')') {
+                if ((caracter == '+' || caracter == '-') && actual.length() > 0) {
+                    terminos.add(actual.toString());
+                    actual = new StringBuilder();
                 }
-                actual.append( caracter );
+                actual.append(caracter);
             }
         }
-        terminos.add( actual.toString() );
-        
-        // Creamos variable para almacenar el resultado de cada termino
+        terminos.add(actual.toString()); // Agrega el último término
+
+        // Resultado acumulado
         StringBuilder resultado = new StringBuilder();
-        
-        for ( String termino : terminos ){
-            
-            // Eliminamos espacios si los hay
+
+        for (String termino : terminos) {
+
             termino = termino.trim();
-            
-            // Si esta vacío continuamos
             if (termino.isEmpty()) continue;
 
-            // Asumimos coeficiente y exponente por defecto
             double coef = 1;
             int exponente = 1;
-            boolean negativo = false;
 
-            // Tenemos en cuenta si empieza en negativo para pasarlo a positivo
-            if (termino.charAt(0) == '-') {
-                negativo = true;
+            // Detectar el signo
+            boolean negativo = termino.charAt(0) == '-';
+            if (negativo || termino.charAt(0) == '+') {
                 termino = termino.substring(1);
             }
 
-            // Si el término es constante le aplicamos la potencia y lo guardamos
+            // Si es una constante numérica (sin 'x')
             if (!termino.contains("x")) {
                 coef = Double.parseDouble(termino);
-                
-                // Si es negativo lo pasamos a negativo multiplicandolo por -1
                 if (negativo) coef *= -1;
                 double nuevoCoef = coef * coef;
                 resultado.append("+").append(nuevoCoef);
-                
-                // Continuamos con el siguiente termino
                 continue;
             }
 
-            // Extraer coeficiente (Número antes de X)
+            // Extraer coeficiente (antes de 'x')
             int indexX = termino.indexOf("x");
-            if (indexX > 0) {
-                coef = Double.parseDouble(termino.substring(0, indexX));
+            String coefStr = termino.substring(0, indexX);
+            if (coefStr.isEmpty()) {
+                coef = 1; // Implícito
+            } else {
+                coef = Double.parseDouble(coefStr);
             }
 
-            // Si es negativo se convierte a negativo
             if (negativo) coef *= -1;
 
-            // Extraer exponente si existe (Luego de ^)
+            // Extraer exponente si hay
             if (termino.contains("^")) {
                 String expStr = termino.substring(termino.indexOf("^") + 1);
                 exponente = Integer.parseInt(expStr);
             }
 
-            // Elevar al cuadrado los valores
             double nuevoCoef = coef * coef;
             int nuevoExp = exponente * 2;
 
-            // Escribimos el resultado que siempre será positivo
             resultado.append("+").append(nuevoCoef).append("x^").append(nuevoExp);
         }
-        
-        // Limpieza final: eliminar primer '+' si lo hay
+
+        // Eliminar '+' inicial si existe y el coeficiente en caso de ser 1
         String finalResultado = resultado.toString();
-        if ( finalResultado.startsWith( "+" ) ) {
-            finalResultado = finalResultado.substring( 1 );
+        if (finalResultado.startsWith("+")) {
+            finalResultado = finalResultado.substring(1);
         }
         
+        if (finalResultado.startsWith("1")) {
+            finalResultado = finalResultado.substring(3);
+        }
+
         return finalResultado;
-        
     }
     
     // Metodo para construir una cadena de mayor a menor grado
@@ -866,44 +867,50 @@ public class DerivadasJava {
     }
     
     // Metodo para evaluar la regla de potencia
-    public static String reglaDePotencia( String funcion ) {
-        
-        funcion = funcion.replace( " ", "" ); // Limpieza
+    public static String reglaDePotencia(String funcion) {
 
-        if ( !funcion.contains( "x" ) ) return ""; // No es una potencia
+        funcion = funcion.replace(" ", ""); // Limpieza
+
+        if (!funcion.contains("x")) return ""; // No es una potencia
 
         // Obtener coeficiente (antes de 'x')
-        int xIndex = funcion.indexOf( "x" );
-        String coefStr = funcion.substring( 0, xIndex );
-        if ( coefStr.isEmpty() ) coefStr = "1";
-        else if ( coefStr.equals( "+" ) ) coefStr = "1";
-        else if ( coefStr.equals( "-" ) ) coefStr = "-1";
+        int xIndex = funcion.indexOf("x");
+        String coefStr = funcion.substring(0, xIndex);
 
-        double coef = Double.parseDouble( coefStr );
+        // Verificar si el coeficiente está vacío o es solo un signo
+        if (coefStr.isEmpty()) {
+            coefStr = "1";  // Si no hay coeficiente, es 1
+        } else if (coefStr.equals("+")) {
+            coefStr = "1";  // Si el coeficiente es '+', es 1
+        } else if (coefStr.equals("-")) {
+            coefStr = "-1";  // Si el coeficiente es '-', es -1
+        }
+
+        double coef = Double.parseDouble(coefStr);
 
         // Obtener exponente (después de '^')
         int exp = 1;
-        if ( funcion.contains( "^" ) ) {
-            int powIndex = funcion.indexOf( "^" );
-            String expStr = funcion.substring( powIndex + 1 );
-            exp = Integer.parseInt( expStr );
+        if (funcion.contains("^")) {
+            int powIndex = funcion.indexOf("^");
+            String expStr = funcion.substring(powIndex + 1);
+            exp = Integer.parseInt(expStr);
         }
 
         double nuevoCoef = coef * exp;
         int nuevoExp = exp - 1;
 
         // Formatear resultado
-        if ( nuevoExp == 0 ) {
-            return String.valueOf( nuevoCoef );
-        } else if ( nuevoExp == 1 ) {
-            return formatearCoef( nuevoCoef ) + "x";
+        if (nuevoExp == 0) {
+            return String.valueOf(nuevoCoef);
+        } else if (nuevoExp == 1) {
+            return formatearCoef(nuevoCoef) + "x";
         } else {
-            return formatearCoef( nuevoCoef ) + "x^" + nuevoExp;
+            return formatearCoef(nuevoCoef) + "x^" + nuevoExp;
         }
     }
-    
+
     // Metodo para formatear coeficientes de potencias
-    private static String formatearCoef(double coef) {
+    public static String formatearCoef(double coef) {
         if (coef == 1.0) return "";
         if (coef == -1.0) return "-";
         if (coef == (int) coef) return String.valueOf((int) coef);
